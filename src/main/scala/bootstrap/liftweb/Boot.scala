@@ -34,6 +34,7 @@ class Boot extends Loggable {
     FoBo.InitParam.ToolKit=FoBo.Bootstrap222
     FoBo.InitParam.ToolKit=FoBo.FontAwesome200TB222
     FoBo.InitParam.ToolKit=FoBo.PrettifyJun2011
+    FoBo.InitParam.ToolKit = FoBo.Knockout210
     FoBo.init()
 
  
@@ -114,7 +115,11 @@ object Paths {
    * [1] https://github.com/karma4u101/FoBo/issues/22#issuecomment-11932972 or 
    * [2] http://www.media4u101.se/fobo-lift-template-demo/libo#fobo-snippets   
    */
-  
+
+  // knockout testing
+
+  val knockout = Menu("Knockout experiments") / "knockout"
+
   //menu dividers
   val divider1   = Menu("divider1") / "divider1" 
   val divider2   = Menu("divider2") / "divider2"
@@ -167,6 +172,7 @@ object Paths {
   val nlHelp     = Menu.i("NLHelp") / "helpindex"
   
   def sitemap = SiteMap(
+      knockout      >> LocGroup("topLeft"),
       navHeader1    >> LocGroup("nl1") >> FoBo.TBLocInfo.NavHeader,
       index         >> LocGroup("topLeft","nl1"),
       ddLabel1      >> LocGroup("topLeft") >> PlaceHolder submenus (

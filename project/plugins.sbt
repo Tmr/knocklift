@@ -11,7 +11,7 @@ libraryDependencies <+= sbtVersion(v => v match {
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.2.0")
 
 //Uncoment this line to enable the sbt eclipse plugin
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.1.1")
+//addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.1.1")
 
 //Uncoment this line to enable the sbt ensime plugin
-addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.0")
+//addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.0")

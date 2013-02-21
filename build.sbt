@@ -16,7 +16,7 @@ seq(webSettings :_*)
 
 logLevel := Level.Info
 
-EclipseKeys.withSource := true
+//EclipseKeys.withSource := true
 
 transitiveClassifiers := Seq("sources")
 
@@ -34,7 +34,7 @@ libraryDependencies ++= {
     "net.liftweb"      %% "lift-squeryl-record"  % liftVersion          % "compile",
     "net.liftweb"      %% "lift-wizard"          % liftVersion          % "compile",
     "net.liftweb"      %% "lift-testkit"         % liftVersion          % "compile",
-    "net.liftmodules"  %% "fobo"                 % (liftVersion+"-0.7.11-SNAPSHOT") withSources()
+    "net.liftmodules"  %% "fobo"                 % (liftVersion+"-0.9.0-SNAPSHOT") withSources()
     )
 }
 
