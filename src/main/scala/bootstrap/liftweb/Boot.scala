@@ -119,6 +119,7 @@ object Paths {
   // knockout testing
 
   val knockout = Menu("Knockout experiments") / "knockout"
+  val aeditable = Menu("Aeditable") / "ajax_editable"
 
   //menu dividers
   val divider1   = Menu("divider1") / "divider1" 
@@ -173,6 +174,7 @@ object Paths {
   
   def sitemap = SiteMap(
       knockout      >> LocGroup("topLeft"),
+      aeditable     >> LocGroup("topLeft"),
       navHeader1    >> LocGroup("nl1") >> FoBo.TBLocInfo.NavHeader,
       index         >> LocGroup("topLeft","nl1"),
       ddLabel1      >> LocGroup("topLeft") >> PlaceHolder submenus (

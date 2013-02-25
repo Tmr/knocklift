@@ -19,7 +19,7 @@ import util.Helpers._
  * To change this template use File | Settings | File Templates.
  */
 
-case class Human(val name:String, age:Int)
+class Human(var name:String, var age:Int)
 
 class LKO {
   implicit val formats = DefaultFormats
@@ -27,8 +27,8 @@ class LKO {
   val injectDataFuncName = "kl.setData"
 
   val population =
-    Human("Adam", 450) ::
-    Human("Eva", 350)  ::
+    new Human("Adam", 930) ::
+    new Human("Eva", 450)  ::
     Nil
 
   def injectData(in:NodeSeq) = {

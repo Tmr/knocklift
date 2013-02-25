@@ -18,7 +18,8 @@ var kl = new function (){
 
         /*
         * LiftDataHolder object is based on DataHolder class by Antonio Salazar Cardozo
-        * which he kindly provided for public at https://gist.github.com/Shadowfiend/2639589
+        * which he kindly provided for public at https://gist.github.com/Shadowfiend/2639589.
+        * This is simple analog of ko.mapping plugin.
         **/
 
         LiftDataHolder = (function() {
