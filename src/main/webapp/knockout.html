@@ -10,94 +10,19 @@
         <script type="text/javascript" src="/classpath/fobo/knockout.js"></script>
     </head_merge>
 
+    <div data-lift="LKO.injectData"></div>
+
     <table class="table">
-        <tbody data-bind="foreach: Data.list">
+        <tbody data-bind="foreach: kl.data.list()">
             <tr>
-                <td data-bind="text: text"></td>
-                <td><input data-bind="value: text" /></td>
+                <td data-bind="text: name"></td>
+                <td><input data-bind="value: name" /></td>
             </tr>
         </tbody>
     </table>
 
     <script type="text/javascript">
 
-        var DataHolder;
-
-        DataHolder = (function() {
-
-        function DataHolder(attributes, defaults, defaultUndefineds) {
-        var attribute, prop, value, _i, _len;
-        defaults || (defaults = {});
-        defaultUndefineds || (defaultUndefineds = []);
-        for (_i = 0, _len = defaultUndefineds.length; _i < _len; _i++) {
-        attribute = defaultUndefineds[_i];
-        defaults[attribute] = void 0;
-        }
-        for (prop in defaults) {
-        value = defaults[prop];
-        if (!attributes[prop]) {
-        attributes[prop] = value;
-        }
-        }
-        this.updateAttributesWith(attributes);
-        }
-
-        DataHolder.prototype.setValue = function(attribute, value) {
-        var current;
-        if (typeof value === 'undefined' && this[attribute]) {
-        return;
-        }
-        current = this[attribute];
-        if (typeof value === 'function' && value['__ko_proto__'] && typeof current === 'function' && current['__ko_proto__']) {
-        return current(value());
-        } else if (typeof current === 'function' && current['__ko_proto__']) {
-        return current(value);
-        } else if (typeof value === 'function') {
-        return this[attribute] = value;
-        } else {
-        return this[attribute] = ko.observable(value);
-        }
-        };
-
-        DataHolder.prototype.preprocessAttribute = function(attribute, value) {
-        if (attribute.match(/Fn$/) && typeof value !== 'function' && value) {
-        return os.processFnString(value);
-        } else {
-        return value;
-        }
-        };
-
-        DataHolder.prototype.updateAttributesWith = function(attributes) {
-        var attribute, _results;
-        _results = [];
-        for (attribute in attributes) {
-        _results.push(this.setValue(attribute, this.preprocessAttribute(attribute, attributes[attribute])));
-        }
-        return _results;
-        };
-
-        return DataHolder;
-
-        })();
-
-        var t = function(){};
-
-        t.DataHolder = DataHolder;
-
-        var DataList = function(list){
-            this.list = ko.utils.arrayMap(list, function(elem){
-               return new t.DataHolder(elem)
-            });
-            this.list = ko.observableArray(this.list);
-        };
-
-        var Data = new DataList([
-            { text: 'Bert', lastName: 'Bertington' },
-            { text: 'Charles', lastName: 'Charlesforth' },
-            { text: 'Denise', lastName: 'Dentiste' }
-        ]);
-
-        ko.applyBindings(Data);
 
     </script>
 
