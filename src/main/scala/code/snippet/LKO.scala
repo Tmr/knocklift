@@ -19,7 +19,9 @@ import util.Helpers._
  * To change this template use File | Settings | File Templates.
  */
 
-class Human(var name:String, var age:Int)
+class Human(var name:String, var age:Int, var wasExpelled: Boolean = true) {
+  def inParadise = !wasExpelled
+}
 
 class LKO {
   implicit val formats = DefaultFormats

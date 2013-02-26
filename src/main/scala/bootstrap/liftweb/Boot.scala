@@ -6,6 +6,8 @@ import Helpers._
 
 import common._
 import http._
+import js._
+import js.jquery._
 import sitemap._
 import Loc._
 import mapper._
@@ -37,7 +39,11 @@ class Boot extends Loggable {
     FoBo.InitParam.ToolKit = FoBo.Knockout210
     FoBo.init()
 
- 
+//    LiftRules.noticesEffects.default.set((notice: Box[NoticeType.Value], id: String) => {
+//      JqJE.JqId(id) ~>
+//      notice.map(n => JqJsCmds.FadeIn(id))
+//    })
+
     /*un-comment and switch to db of your liking */
     MySchemaHelper.initSquerylRecordWithInMemoryDB
     //MySchemaHelper.initSquerylRecordWithMySqlDB

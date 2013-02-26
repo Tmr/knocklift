@@ -7,16 +7,43 @@
 <body class="lift:content_id=main">
 <div id="main" class="lift:surround?with=default;at=content">
 
+    <!--<div class="alert alert-block">-->
+        <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+        <!--<lift:msgs></lift:msgs>-->
+    <!--</div>-->
+
     <div class="container-fluid">
-        <table class="table" data-lift="AEditable.table">
-            <tbody>
-                <tr data-lift="AEditable.editableList">
-                    <td name="name"></td>
-                    <td name="age"></td>
-                    <td name="controls"></td>
-                </tr>
-            </tbody>
-        </table>
+        <div data-lift="BootstrapMsgs"></div>
+        <div class="row">
+            <div class="span12">
+                <table class="table" data-lift="AEditable.table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Was expelled</th>
+                            <th>In paradise</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-lift="AEditable.editableList">
+                            <td height="45px" width="20%">
+                                <div name="edit"></div>
+                                <div>
+                                    <span  name="ok"></span>
+                                    <span  name="cancel"></span>
+                                </div>
+                            </td>
+                            <td height="40px" width="30%" name="name"></td>
+                            <td height="40px" width="30%" name="age"></td>
+                            <td height="40px" width="10%" name="was-expelled"></td>
+                            <td height="40px" width="10%" name="in-paradise"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
 </div>
