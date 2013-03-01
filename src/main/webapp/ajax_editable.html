@@ -14,6 +14,12 @@
 
     <div class="container-fluid">
         <div data-lift="BootstrapMsgs"></div>
+        <div data-lift="FadeOutNotices"></div>
+        <div class="row">
+            <div class="span12" style="min-height:60px">
+                <lift:msgs></lift:msgs>
+            </div>
+        </div>
         <div class="row">
             <div class="span12">
                 <table class="table" data-lift="AEditable.table">
@@ -40,8 +46,23 @@
                             <td height="40px" width="10%" name="was-expelled"></td>
                             <td height="40px" width="10%" name="in-paradise"></td>
                         </tr>
+                        <tr data-lift="AEditable.createNew">
+                            <td height="45px" width="20%">
+                                <div name="add"></div>
+                                <div>
+                                    <span  name="ok"></span>
+                                    <span  name="cancel"></span>
+                                </div>
+                            </td>
+                            <td height="40px" width="30%" name="name"></td>
+                            <td height="40px" width="30%" name="age"></td>
+                            <td height="40px" width="10%" name="was-expelled"></td>
+                            <td height="40px" width="10%" name="in-paradise"></td>
+                        </tr>
                     </tbody>
                 </table>
+                <div data-lift="AEditable.addButton">Add</div>
+                <div data-lift="NoticeTest"></div>
             </div>
         </div>
     </div>
