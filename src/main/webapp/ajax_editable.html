@@ -22,19 +22,17 @@
         </div>
         <div class="row">
             <div class="span12">
-                <table class="table" data-lift="AEditable.table">
+                <table class="table" data-lift="CountriesTable.table">
                     <thead>
                         <tr>
                             <th></th>
                             <th>Name</th>
-                            <th>Age</th>
-                            <th>Was expelled</th>
-                            <th>In paradise</th>
+                            <th>SEO URL</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr data-lift="AEditable.editableList">
-                            <td height="45px" width="20%">
+                        <tr data-lift="CountriesTable.editableList">
+                            <td height="40px" width="20%">
                                 <div name="edit"></div>
                                 <div>
                                     <span  name="ok"></span>
@@ -42,12 +40,10 @@
                                 </div>
                             </td>
                             <td height="40px" width="30%" name="name"></td>
-                            <td height="40px" width="30%" name="age"></td>
-                            <td height="40px" width="10%" name="was-expelled"></td>
-                            <td height="40px" width="10%" name="in-paradise"></td>
+                            <td height="40px" width="30%" name="seo-url"></td>
                         </tr>
-                        <tr data-lift="AEditable.createNew">
-                            <td height="45px" width="20%">
+                        <tr data-lift="CountriesTable.createNew">
+                            <td height="40px" width="20%">
                                 <div name="add"></div>
                                 <div>
                                     <span  name="ok"></span>
@@ -55,18 +51,18 @@
                                 </div>
                             </td>
                             <td height="40px" width="30%" name="name"></td>
-                            <td height="40px" width="30%" name="age"></td>
-                            <td height="40px" width="10%" name="was-expelled"></td>
-                            <td height="40px" width="10%" name="in-paradise"></td>
+                            <td height="40px" width="30%" name="seo-url"></td>
                         </tr>
                     </tbody>
                 </table>
-                <div data-lift="AEditable.addButton">Add</div>
+                <div data-lift="CountriesTable.addButton">Add</div>
                 <div data-lift="NoticeTest"></div>
             </div>
         </div>
     </div>
 
+    <!--<div style="display:none"><div id="error-popover"><span class="lift:msg?id=error-popover"></span></div></div>-->
+    <!--<script type="text/javascript" src="/classpath/fobo/bootstrap-tooltip.js"></script>-->
 </div>
 </body>
 </html>

@@ -25,22 +25,19 @@ import common._
 
 object BootstrapMsgs {
 
+  val noticeAlertClass = "alert alert-info"
+  val warningAlertClass = "alert alert-block"
+  val errorAlertClass = "alert alert-error"
+
   def wrapMsgsJsCmd(notice: Box[NoticeType.Value], id: String): Box[JsCmd] =
     notice.map(n => {
       val noticeNodeClass = n match {
-        case NoticeType.Notice => "alert alert-info"
-        case NoticeType.Warning => "alert alert-block"
-        case NoticeType.Error => "alert alert-error"
+        case NoticeType.Notice => noticeAlertClass
+        case NoticeType.Warning => warningAlertClass
+        case NoticeType.Error => errorAlertClass
       }
-      val wrapHtml = encJs(<div class={noticeNodeClass}></div>.toString())
+      //val wrapHtml = encJs(<div class={noticeNodeClass}></div>.toString())
       val closeButton = encJs(<button type="button" class="close" data-dismiss="alert">&times;</button>.toString())
-//      """
-//        | function(){
-//        | if (jQuery('#%s').attr(""))
-//        | jQuery('#%s').wrap(%s).parent().prepend(%s)
-//        | }()
-//      """.stripMargin
-      //JsRaw(("jQuery('#%s').wrap(%s).parent().prepend(%s)").format(id, wrapHtml, closeButton))})
       JsRaw(("jQuery('#%s').addClass('%s').prepend(%s)").format(id, noticeNodeClass, closeButton))})
 
   def render(in:NodeSeq) = {
@@ -75,7 +72,7 @@ object NoticeTest {
   }
 }
 
-object AEditable {
+trait AjaxEditableTable {
 
   val editLinkCSSClass = "lift_edit_link_class_"
   val hideLinksFnName  = "lift_hide_edit_links_"
@@ -96,13 +93,8 @@ object AEditable {
 
   case class Field(viewFunc: CssSel, editFunc: CssSel)
 
-  val population =
-    new Human("Adam", 930) ::
-    new Human("Eva", 450)  ::
-    Nil
-
-  object dataVar extends SessionVar(population)
   object editForm extends RequestVar[Box[MemoizeTransform]](Empty)
+  object editFormTemplate extends RequestVar[Box[NodeSeq]](Empty)
 
   def table(ns:NodeSeq) =
       <head_merge>
@@ -120,36 +112,16 @@ object AEditable {
     SHtml.ajaxForm(ns)
 
   def editableList = {
-    "*" #> dataVar.get.map(h => {
-      editableRow(h)
-    })
+    (captureEditTemplateForm _) andThen
+      rowSelector
   }
 
-  def editableRow(h:Human) =
-    editable(
-      "@edit", "@ok", "@cancel",
-      () => S.notice(Text("Value was updated")),
-      fieldsFor(h): _*
-    )
+  def rowSelector: NodeSeq => NodeSeq
 
-  def fieldsFor(h:Human) =
-    List(Field("@name *" #> h.name, "@name *" #> SHtml.text(h.name, h.name = _)),
-         Field("@age *" #> h.age, "@age *" #> SHtml.number(h.age, h.age = _, 0, 1000)),
-         Field("@was-expelled *" #> (if (h.wasExpelled) "Yes" else "No"),
-               "@was-expelled *" #> SHtml.checkbox(h.wasExpelled, h.wasExpelled = _)),
-         Field("@in-paradise *" #> (if (h.inParadise) "Yes" else "No"),
-               "@in-paradise *" #> (if (h.inParadise) "Yes" else "No")))
-
-  val createNew =
-    makeAddForm {
-      val h = new Human("Homunculus", 0)
-      addRecordForm(
-        "@add", "@ok", "@cancel",
-        () => {dataVar.set(dataVar.get ++ List(h));S.notice(Text("Value was added"))},
-        editableRow(h)()
-        fieldsFor(h): _*
-      )
-    }
+  def captureEditTemplateForm(ns:NodeSeq):NodeSeq = {
+    editFormTemplate.set(Full(ns))
+    ns
+  }
 
   def addButton(ns:NodeSeq) = {
     val a = SHtml.a(() => {
@@ -169,25 +141,63 @@ object AEditable {
     }
   }
 
-  def smoothReplace(nodeId:String, ns:NodeSeq) =
-    JqJE.JqId(nodeId) ~> JsFunc("fadeOut", 100,
-      AnonFunc(
-        JsHideId(nodeId) &
-        Replace(nodeId, ns) &
-        JqJE.JqId(nodeId) ~> JsFunc("fadeIn", 100)))
-
-
   def addRecordForm(addLinkSelector:String, okButtonSelector: String,
-                    cancelButtonSelector: String, onSubmit:() => JsCmd, afterAddNodes:NodeSeq, fields:Field*) = {
+                    cancelButtonSelector: String, onSubmit:() => Box[JsCmd], renderErrorFn: (Failure, NodeSeq) => NodeSeq,
+                    afterAddNodes: => NodeSeq, fields:List[Field])(ns:NodeSeq) = {
     val nodeId = nextFuncName
-    def removeRowFn =
+    var fn:NodeSeq => NodeSeq = null // dumb forward declaration
+    def removeRowFn() =
       JqJE.JqId(nodeId) ~> JqJE.JqRemove() & showControls
-    makeForm(nodeId, addLinkSelector, okButtonSelector,
-      cancelButtonSelector, onSubmit, Full(removeRowFn _), fields: _*) _
+    def wrappedOnSubmitFn: Box[JsCmd] =
+      onSubmit() match {
+        case Full(js) => Full(showControls & smoothReplace(nodeId, afterAddNodes) & js)
+        case Empty => Full(showControls & smoothReplace(nodeId, afterAddNodes))
+        case fail @ Failure(_,_,_) => {
+          val re = renderErrorFn(fail, fn(ns))
+          Full(smoothReplace(nodeId, re))
+        }
+      }
+
+    fn = makeForm(nodeId, addLinkSelector, okButtonSelector,
+      cancelButtonSelector, wrappedOnSubmitFn _, renderErrorFn, renderAfterSubmit = false, Full(removeRowFn _), fields) _
+    val r = fn(ns)
+    r
   }
 
+  def makeForm(nodeId:String, editLinkSelector:String, okButtonSelector: String, cancelButtonSelector: String,
+               onSubmit: () => Box[JsCmd], renderErrorFn: (Failure, NodeSeq) => NodeSeq, renderAfterSubmit: Boolean,
+               onCancel:Box[() => JsCmd], fields:List[Field])(ns:NodeSeq): NodeSeq = {
+    def renderViewRow:JsCmd =
+      smoothReplace(nodeId, makeRowView(nodeId, editLinkSelector, okButtonSelector,
+        cancelButtonSelector, onSubmit, renderErrorFn, onCancel, fields)(ns))
+
+    var fn:NodeSeq => NodeSeq = null
+
+    fn = editRowFn(fields) &
+      okButtonSelector #>
+        ajaxSubmitInputAttributes.foldLeft(
+          SHtml.ajaxSubmit(ajaxSubmitInputText, () => {
+            if (renderAfterSubmit)
+              onSubmit() match {
+                case Full(js) => showControls & renderViewRow & js
+                case Empty => showControls & renderViewRow
+                // If we have Failure (for example validation errors chain) we render row (renderAfterSubmit is true, else error rendering should be in onSubmit)
+                // and send it to renderErrorFn function along with fail to possibly decorate error in rendered nodes
+                case fail @ Failure(_,_,_) =>
+                    smoothReplace(nodeId, renderErrorFn(fail, fn(ns)))
+              }
+            else onSubmit().openOr(Noop)
+          }))(_ % _) &
+      cancelButtonSelector #> ajaxCancelLinkAttributes.foldLeft(SHtml.a(onCancel.openOr(() => showControls & renderViewRow), ajaxCancelLinkNodes))(_ % _) &
+      "tr [id]" #> nodeId &
+      editLinkSelector #> NodeSeq.Empty
+    val r = fn(ns)
+    r
+  }
+
+
   def makeRowView(nodeId:String, editLinkSelector:String, okButtonSelector: String, cancelButtonSelector: String,
-                   onSubmit: () => JsCmd, fields:Field*)(ns:NodeSeq):NodeSeq = {
+                   onSubmit: () => Box[JsCmd], renderErrorFn: (Failure, NodeSeq) => NodeSeq, onCancel:Box[() => JsCmd], fields:List[Field])(ns:NodeSeq):NodeSeq = {
     val fn = viewRowFn(fields) &
       editLinkSelector #>
         {
@@ -195,7 +205,7 @@ object AEditable {
             SHtml.a(
               () => hideControls &
                     smoothReplace(nodeId, makeForm(nodeId, editLinkSelector, okButtonSelector, cancelButtonSelector,
-                    onSubmit, Empty, fields: _*)(ns)),
+                    onSubmit, renderErrorFn, renderAfterSubmit = true, onCancel, fields)(ns)),
               ajaxEditLinkNodes,
               ajaxEditLinkAttributes: _*)
           )
@@ -206,36 +216,25 @@ object AEditable {
     fn(ns)
   }
 
-  def makeForm(nodeId:String, editLinkSelector:String, okButtonSelector: String, cancelButtonSelector: String,
-               onSubmit: () => JsCmd, onCancel:Box[() => JsCmd], fields:Field*)(ns:NodeSeq): NodeSeq = {
-    val renderViewRow = () =>
-        showControls &
-        smoothReplace(nodeId, makeRowView(nodeId, editLinkSelector, okButtonSelector, cancelButtonSelector,
-          onSubmit, fields: _*)(ns))
-
-    val fn = editRowFn(fields) &
-      okButtonSelector #>
-        ajaxSubmitInputAttributes.foldLeft(
-          SHtml.ajaxSubmit(ajaxSubmitInputText, () => {
-            renderViewRow() & onSubmit()
-          }))(_ % _) &
-      cancelButtonSelector #> ajaxCancelLinkAttributes.foldLeft(SHtml.a(onCancel.openOr(renderViewRow), ajaxCancelLinkNodes))(_ % _) &
-      "tr [id]" #> nodeId &
-      editLinkSelector #> NodeSeq.Empty
-    fn(ns)
-  }
-
   def editable(editLinkSelector:String, okButtonSelector: String, cancelButtonSelector: String,
-               onSubmit: () => JsCmd, fields:Field*):NodeSeq => NodeSeq =
-    makeRowView(nextFuncName, editLinkSelector, okButtonSelector, cancelButtonSelector,
-      onSubmit, fields: _*)
+               onSubmit: () => Box[JsCmd], renderErrorFn: (Failure, NodeSeq) => NodeSeq, userOnCancel:Box[() => JsCmd], fields:List[Field])(ns:NodeSeq):NodeSeq = {
+    val nodeId = nextFuncName
+    def onCancel:JsCmd =
+      userOnCancel.openOr(() => Noop)() &
+      showControls &
+      smoothReplace(nodeId, makeRowView(nodeId, editLinkSelector, okButtonSelector,
+        cancelButtonSelector, onSubmit, renderErrorFn, Full(onCancel _), fields)(ns))
+
+    makeRowView(nodeId, editLinkSelector, okButtonSelector, cancelButtonSelector,
+      onSubmit, renderErrorFn, Full(onCancel _), fields) (ns)
+  }
 
   val addEditClassName = "a [class+]" #> editLinkCSSClass
 
-  val showControls:JsCmd =
+  def showControls:JsCmd =
     Call(showLinksFnName)
 
-  val hideControls:JsCmd =
+  def hideControls:JsCmd =
     Call(hideLinksFnName)
 
   def viewRowFn(fields: Seq[Field]) =
@@ -246,4 +245,12 @@ object AEditable {
 
   def addRowFn(fields: Seq[Field])=
     fields.map(_.editFunc) reduceLeft {(fs, f) =>  fs & f}
+
+
+  def smoothReplace(nodeId:String, ns:NodeSeq) =
+    JqJE.JqId(nodeId) ~> JsFunc("fadeOut", 100,
+      AnonFunc(
+        JsHideId(nodeId) &
+          Replace(nodeId, ns) &
+          JqJE.JqId(nodeId) ~> JsFunc("fadeIn", 100)))
 }
